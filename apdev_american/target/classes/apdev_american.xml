@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:context="http://www.springframework.org/schema/context" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <context:property-placeholder location="american-${env}.properties"/>
+    <ws:consumer-config name="Web_Service_Consumer" wsdlLocation="https://exchange2-asset-manager-kprod.s3.amazonaws.com/68ef9520-24e9-4cf2-b2f5-620025690913/08506d7c-2d79-4c64-8024-2006dd065cc3/global-weather-wsdl-1.0.0-wsdl.wsdl?AWSAccessKeyId=AKIAJTBQMSKYL2HXJA4A&amp;Expires=1524219675&amp;Signature=LaXNAeAzy6Bb9%2Fr169BknMlwI6Y%3D&amp;response-content-disposition=attachment%3B%20filename%3Dglobal-weather-wsdl-1.0.0-wsdl.wsdl" service="GlobalWeather" port="GlobalWeatherSoap" serviceAddress="http://www.webservicex.com/globalweather.asmx" doc:name="Web Service Consumer"/>
+    <flow name="apdev_americanFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/demo"  doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.webserviceX.NET
+---
+{
+	ns0#GetCitiesByCountry: {
+		ns0#CountryName: "Russian Federation"
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Web_Service_Consumer" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
+        <set-payload value="Flight Info , really !!" doc:name="Set Payload"/>
+    </flow>
+</mule>
